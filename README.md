@@ -22,3 +22,12 @@
 ## Importante
 
 - Deve ser desenvolvido em python
+
+---
+
+## Uso (Desenvolvimento)
+
+1. ``git clone https://github.com/eitchtee/desafio_mesha_backend_python.git``
+2. ``cd desafio_mesha_backend_python``
+3. ```pip install -r requirements.txt``` _Use virtualenv quando possível._
+4. ``uvicorn app:app``
