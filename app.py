@@ -60,8 +60,9 @@ class Obras:
         return result
 
     def update(self, obra_id: int, updated_obra: CreateObra):
+        # Retorna  o index do item que detém o id desejado
         matching_obra_index = next((i for i, item in enumerate(self._obras) if item.id == obra_id), None)
-        print(matching_obra_index)
+
         if matching_obra_index is not None:
             self._obras[matching_obra_index] = Obra(**updated_obra.dict(),
                                                     created_at=self._obras[matching_obra_index].created_at,
@@ -73,6 +74,7 @@ class Obras:
             return None
 
     def delete(self, obra_id):
+        # Retorna  o index do item que detém o id desejado
         matching_obra_index = next((i for i, item in enumerate(self._obras) if item.id == obra_id), None)
 
         return self._obras.pop(matching_obra_index) if matching_obra_index is not None else None
@@ -89,11 +91,17 @@ obras = Obras()
 
 @app.post("/obras", response_model=CreateObra)
 async def post_obras(obra: CreateObra):
+    """
+    Adiciona uma obra ao banco de dados
+    """
     return obras.append(obra)
 
 
 @app.post("/upload-obras", response_model=List[Obra])
 async def post_upload_obras(file: UploadFile = File(...)):
+    """
+    Importa os dados de um arquivo .csv com as colunas: titulo, editora, foto, autores. Ignora todas as outras colunas.
+    """
     file = StringIO(file.file.read().decode('utf-8'))
 
     try:
@@ -115,11 +123,19 @@ async def post_upload_obras(file: UploadFile = File(...)):
 
 @app.get("/obras")
 async def get_obras():
+    """
+    Retorna uma lista com todas as obras no banco de dados
+    """
     return obras.get_all()
 
 
 @app.get("/file-obras", response_class=FileResponse)
 async def get_file_obras(data_inicial: datetime.datetime = None):
+    """
+    Gera um .csv com todos as entradas no banco de dados.
+    Pode ser filtrado utilizando uma data em ISO 8601
+    """
+
     obras_list = obras.get_all_as_dict_filtered(filter_date=data_inicial)
     if not obras_list:
         raise HTTPException(status_code=404, detail="Nenhuma obra para exportar!")
@@ -138,6 +154,10 @@ async def get_file_obras(data_inicial: datetime.datetime = None):
 
 @app.put("/obras/{update_id}")
 async def put_obras(update_id: int, updated_obra: CreateObra):
+    """
+    Atualiza uma obra do banco de dados com base no seu respectivo id
+    """
+
     response = obras.update(update_id, updated_obra)
 
     if response is None:
@@ -148,6 +168,10 @@ async def put_obras(update_id: int, updated_obra: CreateObra):
 
 @app.delete("/obras/{delete_id}")
 async def post_upload_obras(delete_id: int):
+    """
+    Apaga uma obra do banco de dados com base no seu respectivo id
+    """
+
     response = obras.delete(delete_id)
 
     if response is None:
